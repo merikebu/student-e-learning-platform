@@ -40,7 +40,19 @@ exports.viewSubmissions = async (req, res) => {
 // ✅ View marks for submitted assignments
 exports.viewMarks = async (req, res) => {
   try {
-    const marks = await Marks.find({ student: req.user.id }).populate("submission");
+    const marks = await Marks.find({ student: req.user.id })
+      .populate({
+        path: "submission",
+        populate: { path: "assignment", select: "title" }
+      })
+      .populate("tutor", "name");
+
+    console.log("Fetched Marks:", marks); // Debugging log
+
+    if (!marks.length) {
+      return res.status(404).json({ message: "No marks found for this student" });
+    }
+
     res.status(200).json(marks);
   } catch (error) {
     res.status(500).json({ message: "Error fetching marks", error: error.message });

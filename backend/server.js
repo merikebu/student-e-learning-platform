@@ -22,7 +22,7 @@ const app = express();
 app.use(express.json()); // Parse JSON request bodies
 app.use(cors()); // Enable CORS for frontend communication
 
-// 5️⃣ Connect to MongoDB
+// 5️⃣ Connect to MongoDB;
 mongoose
   .connect(DB_URI)
   .then(() => console.log("✅ MongoDB Connected"))
@@ -33,10 +33,14 @@ const authRoutes = require("./routes/authRoute");
 const studentRoutes = require("./routes/studentRoute");
 const adminRoutes = require("./routes/adminRoute");
 
+
 // 7️⃣ Define API Endpoints
 app.use("/api/auth", authRoutes); // Authentication (Register, Login, Forgot Password)
 app.use("/api/student", studentRoutes); // Student functionalities (Submissions, Results, Notifications)
 app.use("/api/admin", adminRoutes); // Admin functionalities (Create Assignments, Grading)
+//pdf
+const pdfRoutes = require("./routes/reportRoute");
+app.use("/api", pdfRoutes);
 
 // 8️⃣ Root Endpoint
 app.get("/", (req, res) => {
