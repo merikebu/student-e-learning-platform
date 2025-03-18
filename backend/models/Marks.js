@@ -4,10 +4,11 @@ const MarksSchema = new mongoose.Schema(
   {
     submission: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Submission",
+      ref: "Submission", // This should match your Submission model name
       required: true,
-    }, // Reference to the submitted assignment
-
+    },
+  
+    
     student: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
