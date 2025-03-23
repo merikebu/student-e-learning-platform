@@ -5,6 +5,6 @@ const { authMiddleware } = require("../middleware/authMiddleware");
 const router = express.Router();
 
 // Allow all logged-in users (students, tutors, and admins) to access the report
-router.get("/pdf", authMiddleware, generateMarksReport);
+router.get("/pdf", authMiddleware, generateMarksReport)
 
 module.exports = router;

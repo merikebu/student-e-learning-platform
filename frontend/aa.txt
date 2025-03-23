@@ -1,0 +1,55 @@
+/student-portal  
+ ├── /client (React + Zustand - Frontend)  
+ │   ├── /src  
+ │   │   ├── /components  
+ │   │   │   ├── /Auth  
+ │   │   │   │   ├── Login.js  
+ │   │   │   │   ├── Register.js  
+ │   │   │   │   ├── ForgotPassword.js  
+ │   │   │   ├── /Student  
+ │   │   │   │   ├── Dashboard.js  
+ │   │   │   │   ├── Profile.js  
+ │   │   │   │   ├── Assignments.js (View & Submit Assignments)  
+ │   │   │   │   ├── Submissions.js (View submitted assignments)  
+ │   │   │   │   ├── Results.js (View awarded marks)  
+ │   │   │   │   ├── Notifications.js (AI-powered reminders)  
+ │   │   │   ├── /Admin  
+ │   │   │   │   ├── Dashboard.js  
+ │   │   │   │   ├── ManageStudents.js (Add/Remove students)  
+ │   │   │   │   ├── CreateAssignment.js (Tutors create assignments)  
+ │   │   │   │   ├── ViewSubmissions.js (Tutors view student submissions)  
+ │   │   │   │   ├── GradeAssignments.js (Tutors award marks)  
+ │   │   │   │   ├── ViewResults.js (Tutors see student marks)  
+ │   │   ├── /store (Zustand - State Management)  
+ │   │   │   ├── useAuthStore.js (Authentication state)  
+ │   │   │   ├── useStudentStore.js (Assignment submission & results)  
+ │   │   │   ├── useAdminStore.js (Assignment & student management)  
+ │   │   ├── App.js  
+ │   │   ├── index.js  
+ │   ├── package.json  
+ │   ├── vite.config.js (or webpack.config.js)  
+
+ ├── /server (Node.js + Express + MongoDB - Backend)  
+ │   ├── /models  
+ │   │   ├── User.js (Student & Tutor roles)  
+ │   │   ├── Assignment.js (Stores assignments created by tutors)  
+ │   │   ├── Submission.js (Stores student submissions)  
+ │   │   ├── Marks.js (Stores student grades awarded by tutors)  
+ │   ├── /routes  
+ │   │   ├── authRoutes.js (Register, Login, Forgot Password)  
+ │   │   ├── studentRoutes.js (Submit assignments, view results, get notifications)  
+ │   │   ├── adminRoutes.js (Create assignments, grade submissions, view student results)  
+ │   ├── /controllers  
+ │   │   ├── authController.js (Handles authentication)  
+ │   │   ├── studentController.js (Handles submissions & result viewing)  
+ │   │   ├── adminController.js (Handles assignment creation, grading & student management)  
+ │   ├── /middleware  
+ │   │   ├── authMiddleware.js (JWT verification for protected routes)  
+ │   ├── /utils  
+ │   │   ├── sendEmail.js (For password reset & AI notifications)  
+ │   ├── server.js (Main backend entry point)  
+ │   ├── .env (Environment variables for DB & API keys)  
+ │   ├── package.json  
+
+ ├── README.md  
+ ├── .gitignore
