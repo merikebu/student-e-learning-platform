@@ -5,8 +5,90 @@ const User = require("../models/User"); // Ensure User model is imported
 
 
 const PDFDocument = require("pdfkit");
-const fs = require("fs");
-const path = require("path");
+
+
+// ✅ View all students
+exports.getAllStudents = async (req, res) => {
+  try {
+    const students = await User.find({ role: "student" }).select("_id name email");
+    res.status(200).json(students);
+  } catch (error) {
+    console.error("Error fetching students:", error);
+    res.status(500).json({ message: "Error fetching students", error: error.message });
+  }
+};
+
+
+
+// ✅ Remove a student
+exports.removeStudent = async (req, res) => {
+  const { studentId } = req.params;
+
+  try {
+    const deletedStudent = await User.findByIdAndDelete(studentId);
+    if (!deletedStudent) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+    res.status(200).json({ message: "Student removed successfully" });
+  } catch (error) {
+    console.error("Error removing student:", error);
+    res.status(500).json({ message: "Error removing student", error: error.message });
+  }
+};
+
+
+// ✅ View all assignments
+exports.getAssignments = async (req, res) => {
+  try {
+    const assignments = await Assignment.find().populate("createdBy", "name");
+    res.status(200).json(assignments);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching assignments", error: error.message });
+  }
+};
+
+// ✅ Update an assignment
+exports.updateAssignment = async (req, res) => {
+  try {
+    const { title, description, dueDate } = req.body;
+    const { assignmentId } = req.params;
+
+    const updatedAssignment = await Assignment.findByIdAndUpdate(
+      assignmentId,
+      { title, description, dueDate },
+      { new: true }
+    );
+
+    if (!updatedAssignment) {
+      return res.status(404).json({ message: "Assignment not found" });
+    }
+
+    res.status(200).json({ message: "Assignment updated successfully", updatedAssignment });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating assignment", error: error.message });
+  }
+};
+
+// ✅ Delete an assignment
+exports.deleteAssignment = async (req, res) => {
+  try {
+    const { assignmentId } = req.params;
+
+    // Delete the assignment
+    const deletedAssignment = await Assignment.findByIdAndDelete(assignmentId);
+    if (!deletedAssignment) {
+      return res.status(404).json({ message: "Assignment not found" });
+    }
+
+    // Also delete related submissions & marks
+    await Submission.deleteMany({ assignment: assignmentId });
+    await Marks.deleteMany({ submission: { $in: deletedAssignment.submissions } });
+
+    res.status(200).json({ message: "Assignment and related data deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting assignment", error: error.message });
+  }
+};
 
 exports.generateMarksReport = async (req, res) => {
   try {
@@ -91,32 +173,29 @@ exports.generateMarksReport = async (req, res) => {
   }
 };
 // ✅ Create an assignment
+// ✅ Create an assignment and assign to all students
 exports.createAssignment = async (req, res) => {
-  try {
-    const { title, description, dueDate, studentsAssigned } = req.body;
+  const { title, description, dueDate } = req.body;
 
-    // Validate that all assigned students exist
-    const validStudents = await User.find({ _id: { $in: studentsAssigned } });
+  // Fetch all students
+  const students = await User.find({ role: "student" }).select("_id");
 
-    if (validStudents.length !== studentsAssigned.length) {
-      return res.status(400).json({ message: "One or more students are invalid" });
-    }
-
-    // Create the assignment
-    const assignment = await Assignment.create({
-      title,
-      description,
-      dueDate,
-      createdBy: req.user.id,
-      studentsAssigned, // Include the valid students
-    });
-
-    res.status(201).json({ message: "Assignment created successfully", assignment });
-  } catch (error) {
-    res.status(500).json({ message: "Error creating assignment", error: error.message });
+  // If no students exist, return an error
+  if (!students.length) {
+    return res.status(400).json({ message: "No students found to assign this assignment" });
   }
-};
 
+  // Create the assignment
+  const assignment = await Assignment.create({
+    title,
+    description,
+    dueDate,
+    createdBy: req.user.id,
+    studentsAssigned: students.map((student) => student._id), // Assign to all students
+  });
+
+  res.status(201).json({ message: "Assignment created for all students", assignment });
+};
 // ✅ View student submissions
 exports.viewStudentSubmissions = async (req, res) => {
   try {

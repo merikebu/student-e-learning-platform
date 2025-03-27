@@ -2,85 +2,83 @@ import { create } from "zustand";
 import axios from "axios";
 
 const useAdminStore = create((set) => ({
-  students: [],
-  submissions: [],
   assignments: [],
+  students: [],
 
   // Fetch all students
-  fetchStudents: async () => {
+  getStudents: async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/admin/students", {
+      const res = await axios.get("https://localhost:5000/api/admin/manage-students", {
         withCredentials: true,
       });
       set({ students: res.data });
-    } catch (err) {
-      console.error("Error fetching students:", err);
-    }
-  },
-
-  // Add a new student
-  addStudent: async (studentData) => {
-    try {
-      await axios.post("http://localhost:3000/api/admin/students", studentData, {
-        withCredentials: true,
-      });
-      set((state) => ({ students: [...state.students, studentData] }));
-    } catch (err) {
-      console.error("Error adding student:", err);
+    } catch (error) {
+      console.error("Error fetching students:", error);
     }
   },
 
   // Remove a student
-  removeStudent: async (studentId) => {
+  removeStudent: async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/api/admin/students/${studentId}`, {
+      await axios.delete(`https://localhost:5000/api/admin/manage-students/${id}`, {
         withCredentials: true,
       });
-      set((state) => ({ students: state.students.filter((s) => s._id !== studentId) }));
-    } catch (err) {
-      console.error("Error removing student:", err);
-    }
-  },
-
-  // Fetch all submissions
-  fetchSubmissions: async () => {
-    try {
-      const res = await axios.get("http://localhost:3000/api/admin/submissions", {
-        withCredentials: true,
-      });
-      set({ submissions: res.data });
-    } catch (err) {
-      console.error("Error fetching submissions:", err);
-    }
-  },
-
-  // Grade an assignment
-  gradeAssignment: async (submissionId, grade) => {
-    try {
-      await axios.post(
-        `http://localhost:3000/api/admin/grade/${submissionId}`,
-        { grade },
-        { withCredentials: true }
-      );
       set((state) => ({
-        submissions: state.submissions.map((sub) =>
-          sub._id === submissionId ? { ...sub, grade } : sub
-        ),
+        students: state.students.filter((s) => s._id !== id),
       }));
-    } catch (err) {
-      console.error("Error grading assignment:", err);
+    } catch (error) {
+      console.error("Error removing student:", error);
     }
   },
 
-  // Create a new assignment
+  
+
+
+  // Fetch assignments
+  fetchAssignments: async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/admin/assignments", {
+        withCredentials: true,
+      });
+      set({ assignments: res.data });
+    } catch (err) {
+      console.error("Error fetching assignments:", err);
+    }
+  },
+
+  // Create an assignment
   createAssignment: async (assignmentData) => {
     try {
-      const res = await axios.post("http://localhost:3000/api/admin/assignments", assignmentData, {
+      await axios.post("http://localhost:5000/api/admin/assignments", assignmentData, {
         withCredentials: true,
       });
-      set((state) => ({ assignments: [...state.assignments, res.data] }));
+      await useAdminStore.getState().fetchAssignments(); // Refresh the list
     } catch (err) {
       console.error("Error creating assignment:", err);
+    }
+  },
+
+  // Update an assignment
+  updateAssignment: async (assignmentId, updatedData) => {
+    try {
+      await axios.put(`http://localhost:5000/api/admin/assignments/${assignmentId}`, updatedData, {
+        withCredentials: true,
+      });
+      await useAdminStore.getState().fetchAssignments(); // Refresh the list
+    } catch (err) {
+      console.error("Error updating assignment:", err);
+    }
+  },
+
+  // Delete an assignment
+  deleteAssignment: async (assignmentId) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/admin/assignments/${assignmentId}`, {
+        withCredentials: true,
+      });
+      await useAdminStore.getState().fetchAssignments(); // Refresh the list
+    } catch (err) {
+      console.error("Error deleting assignment:", err);
     }
   },
 }));

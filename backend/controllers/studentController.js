@@ -1,23 +1,31 @@
 const Submission = require("../models/Submission");
 const Marks = require("../models/Marks");
-const Assignment = require("../models/Assignment"); // Ensure consistency
-const sendEmail = require("../utils/sendEmail"); // Import email function if needed
+const Assignment = require("../models/Assignment");
+const sendEmail = require("../utils/sendEmail");
+
+// ✅ View all assignments sent by admin
+exports.viewAssignments = async (req, res) => {
+  try {
+    const assignments = await Assignment.find().sort({ createdAt: -1 }); // Fetch assignments sorted by latest
+    res.status(200).json(assignments);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching assignments", error: error.message });
+  }
+};
 
 // ✅ Submit an assignment
 exports.submitAssignment = async (req, res) => {
   try {
     const { assignmentId, fileUrl } = req.body;
 
-    // Check if the assignment exists before submission
     const assignment = await Assignment.findById(assignmentId);
     if (!assignment) {
       return res.status(404).json({ message: "Assignment not found" });
     }
 
-    // Create submission
     const submission = await Submission.create({
       assignment: assignmentId,
-      student: req.user.id, // Ensure consistency with other controllers
+      student: req.user.id,
       fileUrl,
     });
 
@@ -47,8 +55,6 @@ exports.viewMarks = async (req, res) => {
       })
       .populate("tutor", "name");
 
-    console.log("Fetched Marks:", marks); // Debugging log
-
     if (!marks.length) {
       return res.status(404).json({ message: "No marks found for this student" });
     }
@@ -62,12 +68,10 @@ exports.viewMarks = async (req, res) => {
 // ✅ AI-powered notifications for assignments
 exports.getNotifications = async (req, res) => {
   try {
-    // Ensure the email function is available and the user has an email
     if (!req.user.email) {
       return res.status(400).json({ message: "User email not available" });
     }
 
-    // Send notification
     await sendEmail(req.user.email, "Assignment Reminder", "You have upcoming assignments due!");
     
     res.status(200).json({ message: "Notification sent!" });
